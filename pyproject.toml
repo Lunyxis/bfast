@@ -8,7 +8,7 @@ dynamic = ["version"]
 authors = [
     {name = "Christopher Elin", email = "christopher.elin@airbus.com"},
 ]
-description = "A Python package for the bfast-py project"
+description = "A Python package for the bfast project"
 readme = "README.md"
 requires-python = ">=3.10"
 classifiers = [
