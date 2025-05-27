@@ -5,19 +5,19 @@ Created on Apr 19, 2018
 '''
 
 import multiprocessing as mp
-from functools import partial
+import warnings
 
 import numpy as np
-np.warnings.filterwarnings('ignore')
-np.set_printoptions(suppress=True)
 from sklearn import linear_model
 
 from bfast.base import BFASTMonitorBase
 from bfast.monitor.utils import compute_end_history, compute_lam, map_indices
 
+warnings.filterwarnings('ignore')
+
 
 class BFASTMonitorPython(BFASTMonitorBase):
-    """ BFAST Monitor implementation based on Python and Numpy. The
+    """BFAST Monitor implementation based on Python and Numpy. The
     interface follows the one of the corresponding R package
     (see https://cran.r-project.org/web/packages/bfast)
 
@@ -79,31 +79,19 @@ class BFASTMonitorPython(BFASTMonitorBase):
     -----
 
     """
-    def __init__(self,
-                 start_monitor,
-                 freq=365,
-                 k=3,
-                 hfrac=0.25,
-                 trend=True,
-                 level=0.05,
-                 period=10,
-                 verbose=0,
-                 use_mp=False
-                 ):
-        super().__init__(start_monitor,
-                         freq,
-                         k=k,
-                         hfrac=hfrac,
-                         trend=trend,
-                         level=level,
-                         period=period,
-                         verbose=verbose)
+
+    def __init__(
+        self, start_monitor, freq=365, k=3, hfrac=0.25, trend=True, level=0.05, period=10, verbose=0, use_mp=False
+    ):
+        super().__init__(
+            start_monitor, freq, k=k, hfrac=hfrac, trend=trend, level=level, period=period, verbose=verbose
+        )
 
         self._timers = {}
         self.use_mp = use_mp
 
     def fit(self, data, dates, n_chunks=None, nan_value=0):
-        """ Fits the models for the ndarray 'data'
+        """Fits the models for the ndarray 'data'
 
         Parameters
         ----------
@@ -129,7 +117,7 @@ class BFASTMonitorPython(BFASTMonitorBase):
         data = np.copy(data_ints).astype(np.float32)
 
         # set NaN values
-        data[data_ints==nan_value] = np.nan
+        data[data_ints == nan_value] = np.nan
 
         self.n = compute_end_history(dates, self.start_monitor)
 
@@ -147,10 +135,10 @@ class BFASTMonitorPython(BFASTMonitorBase):
             p_map = pool.map(self.fit_single, y)
             rval = np.array(p_map, dtype=object).reshape(data.shape[1], data.shape[2], 4)
 
-            self.breaks = rval[:,:,0].astype(np.int32)
-            self.means = rval[:,:,1].astype(np.float32)
-            self.magnitudes = rval[:,:,2].astype(np.float32)
-            self.valids = rval[:,:,3].astype(np.int32)
+            self.breaks = rval[:, :, 0].astype(np.int32)
+            self.means = rval[:, :, 1].astype(np.float32)
+            self.magnitudes = rval[:, :, 2].astype(np.float32)
+            self.valids = rval[:, :, 3].astype(np.int32)
         else:
             means_global = np.zeros((data.shape[1], data.shape[2]), dtype=np.float32)
             magnitudes_global = np.zeros((data.shape[1], data.shape[2]), dtype=np.float32)
@@ -162,15 +150,12 @@ class BFASTMonitorPython(BFASTMonitorBase):
                     print("Processing row {}".format(i))
 
                 for j in range(data.shape[2]):
-                    y = data[:,i,j]
-                    (pix_break,
-                     pix_mean,
-                     pix_magnitude,
-                     pix_num_valid) = self.fit_single(y)
-                    breaks_global[i,j] = pix_break
-                    means_global[i,j] = pix_mean
-                    magnitudes_global[i,j] = pix_magnitude
-                    valids_global[i,j] = pix_num_valid
+                    y = data[:, i, j]
+                    (pix_break, pix_mean, pix_magnitude, pix_num_valid) = self.fit_single(y)
+                    breaks_global[i, j] = pix_break
+                    means_global[i, j] = pix_mean
+                    magnitudes_global[i, j] = pix_magnitude
+                    valids_global[i, j] = pix_num_valid
 
             self.breaks = breaks_global
             self.means = means_global
@@ -180,7 +165,7 @@ class BFASTMonitorPython(BFASTMonitorBase):
         return self
 
     def fit_single(self, y):
-        """ Fits the BFAST model for the 1D array y.
+        """Fits the BFAST model for the 1D array y.
 
         Parameters
         ----------
@@ -231,14 +216,18 @@ class BFASTMonitorPython(BFASTMonitorBase):
         model.fit(X_nn_h.T, y_nn_h)
 
         if self.verbose > 1:
-            column_names = np.array(["Intercept",
-                                     "trend",
-                                     "harmonsin1",
-                                     "harmoncos1",
-                                     "harmonsin2",
-                                     "harmoncos2",
-                                     "harmonsin3",
-                                     "harmoncos3"])
+            column_names = np.array(
+                [
+                    "Intercept",
+                    "trend",
+                    "harmonsin1",
+                    "harmoncos1",
+                    "harmonsin2",
+                    "harmoncos2",
+                    "harmonsin3",
+                    "harmoncos3",
+                ]
+            )
             if self.trend:
                 indxs = np.array([0, 1, 3, 5, 7, 2, 4, 6])
             else:
@@ -252,14 +241,14 @@ class BFASTMonitorPython(BFASTMonitorBase):
         y_error = y_nn - y_pred
 
         # (2) evaluate model on monitoring period mosum_nn process
-        err_cs = np.cumsum(y_error[ns - h:Ns + 1])
+        err_cs = np.cumsum(y_error[ns - h : Ns + 1])
         mosum_nn = err_cs[h:] - err_cs[:-h]
 
         sigma = np.sqrt(np.sum(y_error[:ns] ** 2) / (ns - (2 + 2 * self.k)))
         mosum_nn = 1.0 / (sigma * np.sqrt(ns)) * mosum_nn
 
         mosum = np.repeat(np.nan, N - self.n)
-        mosum[val_inds[:Ns - ns]] = mosum_nn
+        mosum[val_inds[: Ns - ns]] = mosum_nn
         if self.verbose:
             print("MOSUM process", mosum_nn.shape)
 
@@ -270,7 +259,7 @@ class BFASTMonitorPython(BFASTMonitorBase):
         magnitude = np.median(y_error[ns:])
 
         # boundary and breaks
-        a = self.mapped_indices[self.n:] / self.mapped_indices[self.n - 1].astype(np.float)
+        a = self.mapped_indices[self.n :] / self.mapped_indices[self.n - 1].astype(np.float)
         bounds = self.lam * np.sqrt(self._log_plus(a))
 
         if self.verbose:
@@ -288,7 +277,7 @@ class BFASTMonitorPython(BFASTMonitorBase):
         return first_break, mean, magnitude, Ns
 
     def get_timers(self):
-        """ Returns runtime measurements for the
+        """Returns runtime measurements for the
         different phases of the fitting process.
 
         Returns

@@ -1,0 +1,35 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "bfast"
+version = "1.0.0"
+authors = [
+    {name = "Christopher Elin", email = "christopher.elin@airbus.com"},
+]
+description = "A Python package for the bfast-py project"
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "numpy~=2.0",
+    "pandas~=2.0",
+    "scipy~=1.0",
+    "scikit-learn~=1.0",
+    "pyopencl"
+]
+
+[project.optional-dependencies]
+dev = [
+    "matplotlib"
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/bfast/"]
+
+[tool.hatch.version]
+path = "src/bfast/__init__.py"
