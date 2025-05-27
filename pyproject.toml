@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "bfast"
-version = "1.0.0"
+dynamic = ["version"]
 authors = [
     {name = "Christopher Elin", email = "christopher.elin@airbus.com"},
 ]
@@ -15,6 +15,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
 ]
+
 dependencies = [
     "numpy~=2.0",
     "pandas~=2.0",
