@@ -1,6 +1,8 @@
-# bfast
+# BFAST
 
-e bfast package provides a highly-efficient parallel implementation for the [Breaks For Additive Season and Trend (BFASTmonitor)](http://bfast.r-forge.r-project.org)_proposed by Verbesselt et al. The implementation is based on [OpenCL](https://www.khronos.org/opencl).  
+The bfast package provides a highly-efficient parallel implementation for the [Breaks For Additive Season and Trend (BFASTmonitor)](http://bfast.r-forge.r-project.org) proposed by Verbesselt et al. The implementation is based on [OpenCL](https://www.khronos.org/opencl).  
+
+This project is a fork from [diku-dk/bfast](https://github.com/diku-dk/bfast), that has been updated, to work with recent versions of Python and its dependencies, and to be used with the [uv](https://github.com/astral-sh/uv) package manager.
 
 ## Documentation
 
@@ -103,5 +105,4 @@ twine upload dist/*
 
 ## License
 
-Proprietary. For internal use only.
-@ 2025 Airbus Defence and Space. All rights reserved.
+See the [LICENSE](LICENSE) file for details.
